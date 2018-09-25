@@ -4,6 +4,7 @@
       <v-layout row wrap column align-left>
         <v-flex xs12 sm6 md3>
           <v-text-field
+          v-model="Title"
             label="Title"
             counter="30"
             :rules="[rules.charlength(30)]"
@@ -83,6 +84,7 @@ export default {
   data () {
     return {
       bio: '',
+      Title:'',
       dialog: false,
       myImages: [],
       // imageNames: [],
@@ -93,7 +95,7 @@ export default {
         'Password must contain an upper case letter, a numeric character, and a special character',
         required: v => !!v || 'This field is required',
         charlength: len => v => (v.length <= len) || `cannot exceed ${len} characters`
-      }
+      }      
     }
   },
   computed: {
@@ -137,6 +139,7 @@ export default {
         // this.imageNames = ''
         // this.imageFiles = ''
         // this.imageUrls = ''
+        
       }
     },
     removeImage (index) {
