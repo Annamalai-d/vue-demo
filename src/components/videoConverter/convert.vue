@@ -19,7 +19,7 @@
             :rules="[rules.charlength(250)]"
       ></v-textarea>
       <v-container>
-        <v-btn @click='pickFile' color="blue">Upload Images
+        <v-btn @click='pickFile' color="blue">Select Images
         </v-btn>
           <input
           type="file"
@@ -48,7 +48,8 @@
               </v-layout>
             </v-container>
       </v-container>
-      <v-btn @click.stop="process" :disabled="dialog" :loading="dialog" color="blue">Submit</v-btn>
+      <v-btn v-if="!convert" @click.stop="sendImagetoServer" :disabled="dialog" :loading="dialog" color="blue">Upload</v-btn>
+      <v-btn v-if="convert" @click.stop="downloadfbUrl" color="blue">Convert</v-btn>
       <v-dialog
       v-model="dialog"
       hide-overlay
@@ -69,10 +70,6 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-      <!-- <v-card
-      color="lightblue"
-      width="250px"> -->
-      <!-- </v-card> -->
         </v-flex>
       </v-layout>
     </v-container>
@@ -80,22 +77,25 @@
 </template>
 <script>
 import {store} from '../../../store/store.js'
+import {storage} from '../../../firebaseConfig.js'
 export default {
   data () {
     return {
       bio: '',
-      Title:'',
+      Title: '',
       dialog: false,
+      convert: false,
       myImages: [],
+      // intervelId: '',
       // imageNames: [],
-      // imageUrls: [],
-      // imageFiles: [],
+      fbImageUrls: [],
+      Files: [],
       rules: {email: v => (v || '').match(/@/) || 'Please enter a valid email',
         password: v => (v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
         'Password must contain an upper case letter, a numeric character, and a special character',
         required: v => !!v || 'This field is required',
         charlength: len => v => (v.length <= len) || `cannot exceed ${len} characters`
-      }      
+      }
     }
   },
   computed: {
@@ -107,9 +107,9 @@ export default {
     changecomponents (compname) {
       store.commit('setcomponent', {name: compname.name, title: compname.title})
     },
-    process () {
+    Progress () {
       // changecomponents({name: 'my-load',title: 'loading..'})
-      this.dialog = true
+      this.dialog = !this.dialog
     },
     pickFile () {
       this.$refs.image.click()
@@ -125,6 +125,7 @@ export default {
           if (imgName.lastIndexOf('.') <= 0) {
             return
           }
+          this.Files = files
           const fr = new FileReader()
           fr.readAsDataURL(file)
           fr.addEventListener('load', () => {
@@ -136,19 +137,46 @@ export default {
         }
       } else {
         this.myImages = [{imageName: '', imageFile: '', imageUrl: ''}]
-        // this.imageNames = ''
-        // this.imageFiles = ''
-        // this.imageUrls = ''
-        
       }
     },
     removeImage (index) {
       this.myImages.splice(index, 1)
+    },
+    sendImagetoServer () {
+      this.dialog = true
+      var Files = this.myImages
+      Files.forEach((file) => {
+        var storageRef = storage.ref()
+        // alert(file.imageName)
+        //  dynamically set reference to the file name
+        var thisRef = storageRef.child(file.imageName)
+        //  put request upload file to firebase storage
+        thisRef.put(file.imageFile).then(function (snapshot) {
+          console.log('Image Upload Success!')
+          // this.intervelId = setInterval(() => { console.log(snapshot.bytesTransferred) }, 100)
+        })
+      })
+      clearInterval(this.intervelId)
+      this.dialog = false
+      this.convert = true
+    },
+    downloadfbUrl () {
+      var imgfiles = []
+      this.dialog = true
+      //  get request to get URL for uploaded file
+      var Files = this.myImages
+      Files.forEach((file) => {
+        var imgRef = storage.ref(file.imageName)
+        imgRef.getDownloadURL().then(function (url) {
+          imgfiles.push(url)
+          alert(imgfiles)
+        })
+      })
+      this.dialog = false
     }
   },
   watch: {
     dialog (val) {
-      alert(val)
       if (!val) return
       setTimeout(() => (this.dialog = false), 4000)
     }

@@ -3,12 +3,12 @@ import 'firebase/firestore'
 
 // firebase init goes here
 const config = {
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: ""
+    apiKey: "AIzaSyDFU7gRPqA_RLlobgo9Ixh9dwCYX5snlyc",
+    authDomain: "mytest-sfo.firebaseapp.com",
+    databaseURL: "https://mytest-sfo.firebaseio.com",
+    projectId: "mytest-sfo",
+    storageBucket: "mytest-sfo.appspot.com",
+    messagingSenderId: "839636096139"
 }
 firebase.initializeApp(config)
 
@@ -17,6 +17,7 @@ const db = firebase.firestore()
 const auth = firebase.auth()
 const currentUser = auth.currentUser
 const storage = firebase.storage()
+const storageRef = storage.ref()
 
 // date issue fix according to firebase
 const settings = {
@@ -34,7 +35,8 @@ export {
     db,
     auth,
     currentUser,
-    storage
+    storage,
+    storageRef
     // usersCollection,
     // postsCollection,
     // commentsCollection,
