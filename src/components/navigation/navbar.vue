@@ -48,11 +48,11 @@
           @click.native.stop="isUser = !isUser"
         >Logout
         </v-btn>
-        <v-btn v-else
-          flat
-          @click.native.stop="rightDrawer = !rightDrawer"
-        >Login
+        <router-link to="userRoot">
+        <v-btn v-if="!isUser"
+          flat >Login
         </v-btn>
+        </router-link>
       </v-toolbar>
       </div>
       </template>
@@ -81,6 +81,12 @@ export default {
   methods: {
     changecomponents (compname) {
       store.commit('setcomponent', {name: compname.name, title: compname.title})
+    }
+  },
+  created () {
+    if (window.screen.width > 1264) {
+      this.miniVariant = false
+      this.drawer = true
     }
   }
 }

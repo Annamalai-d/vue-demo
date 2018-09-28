@@ -12,6 +12,9 @@ import converted from './components/videoConverter/converted.vue'
 import videos from './components/videoConverter/videos.vue'
 import Root from './components/vc_Root.vue'
 import Home from './components/vc_Home.vue'
+import login from './components/user/login.vue'
+import register from './components/user/register.vue'
+import mydialog from './components/shared/dialogue.vue'
 Vue.config.productionTip = false
 Vue.use(vuetify)
 Vue.component('my-nav', navbar)
@@ -21,6 +24,9 @@ Vue.component('my-converted', converted)
 Vue.component('my-root',Root)
 Vue.component('my-home',Home)
 Vue.component('my-vdos',videos)
+Vue.component('my-lgn',login)
+Vue.component('my-register',register)
+Vue.component('my-dialog', mydialog)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

@@ -1,7 +1,7 @@
 <template>
   <v-form :aria-disabled="dialog">
       <v-container>
-      <v-layout row wrap column align-left>
+      <v-layout row wrap column align-content-center>
         <v-flex xs12 sm6 md3>
           <v-text-field
           v-model="Title"
@@ -18,8 +18,7 @@
             counter="250"
             :rules="[rules.charlength(250)]"
       ></v-textarea>
-      <v-container>
-        <v-btn @click='pickFile' color="blue">Select Images
+        <v-btn v-if="!convert" @click='pickFile' color="blue">Select Images
         </v-btn>
           <input
           type="file"
@@ -29,28 +28,25 @@
           :multiple=true
           @change="onFilePicked"
           >
-            <v-container>
-              <v-layout row wrap>
+          </v-flex>
+          </v-layout>
+    </v-container>
+    <v-container>
+              <v-layout row wrap justify-space-around>
                 <v-flex xs12 sm6 md4 lg3
                 v-for="(myimage,index) in myImages" :key="index">
                       <v-hover>
                     <v-card :key="index" height="150px" width="250px" slot-scope="{ hover }"
                       :class="`elevation-${hover ? 7 : 2}`">
                     <v-badge top overlap color="trnsparent">
-                      <v-icon fab @click="removeImage(index)" slot="badge">close</v-icon>
+                      <v-icon v-if="!convert" fab @click="removeImage(index)" slot="badge">close</v-icon>
                     <v-img :src="myimage.imageUrl" height="100px" width="250px" v-if="myimage.imageUrl" :key="index">
                      </v-img>
                       </v-badge>
                     <v-card-text row wrap>{{myimage.imageName}}</v-card-text>
                     </v-card>
                       </v-hover>
-                </v-flex>
-              </v-layout>
-            </v-container>
-      </v-container>
-      <v-btn v-if="!convert" @click.stop="sendImagetoServer" :disabled="dialog" :loading="dialog" color="blue">Upload</v-btn>
-      <v-btn v-if="convert" @click.stop="downloadfbUrl" color="blue">Convert</v-btn>
-      <v-dialog
+                      <v-dialog
       v-model="dialog"
       hide-overlay
       persistent
@@ -70,14 +66,21 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-        </v-flex>
-      </v-layout>
-    </v-container>
+                </v-flex>
+              </v-layout>
+      </v-container>
+      <v-container>
+        <v-layout justify-center>
+      <v-btn v-if="itemslength>0 && !convert" @click.stop="sendImagetoServer" :disabled="dialog" :loading="dialog" color="blue">Upload</v-btn>
+      <v-btn v-if="convert" @click.stop="downloadfbUrl" color="blue">Convert</v-btn>
+        </v-layout>
+      </v-container>
   </v-form>
 </template>
 <script>
 import {store} from '../../../store/store.js'
 import {storage} from '../../../firebaseConfig.js'
+
 export default {
   data () {
     return {
@@ -86,7 +89,8 @@ export default {
       dialog: false,
       convert: false,
       myImages: [],
-      // intervelId: '',
+      intervelId: '123',
+      progressData: '123',
       // imageNames: [],
       fbImageUrls: [],
       Files: [],
@@ -101,6 +105,9 @@ export default {
   computed: {
     componentName () {
       return store.state.componentTitle
+    },
+    itemslength () {
+      return this.myImages.length
     }
   },
   methods: {
@@ -131,8 +138,6 @@ export default {
           fr.addEventListener('load', () => {
             imgUrl = fr.result
             this.myImages.push({imageName: file.name, imageFile: imgFile, imageUrl: imgUrl})
-            // this.imageUrls.push(fr.result)
-            // this.imageFiles.push(file)// this is an image file that can be sent to server...
           })
         }
       } else {
@@ -143,22 +148,33 @@ export default {
       this.myImages.splice(index, 1)
     },
     sendImagetoServer () {
-      this.dialog = true
+      let self = this
+      // this.dialog = true
+      // setTimeout(() => {
+      //   this.dialog = false
+      // }, 3000)
       var Files = this.myImages
       Files.forEach((file) => {
+        self.dialog = true
         var storageRef = storage.ref()
         // alert(file.imageName)
         //  dynamically set reference to the file name
         var thisRef = storageRef.child(file.imageName)
         //  put request upload file to firebase storage
         thisRef.put(file.imageFile).then(function (snapshot) {
-          console.log('Image Upload Success!')
-          // this.intervelId = setInterval(() => { console.log(snapshot.bytesTransferred) }, 100)
+          self.dialog = false
+        //   console.log('Image Upload Success!')
+        //   console.log(self.progressData + '--progress')
+        //   console.log(snapshot.totalBytes + '--Total Bytes')
+        //   self.intervelId = setInterval(() => {
+        //     self.progressData = snapshot.bytesTransferred
+        //     console.log(self.progressData)
+        //   }, 100)
+        //   setTimeout(() => { clearInterval(self.intervelId) }, 5000)
         })
       })
-      clearInterval(this.intervelId)
-      this.dialog = false
-      this.convert = true
+      clearInterval(self.intervelId)
+      self.convert = true
     },
     downloadfbUrl () {
       var imgfiles = []

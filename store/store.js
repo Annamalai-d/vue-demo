@@ -6,12 +6,16 @@ Vue.use(Vuex)
 export const store = new Vuex.Store({
   state: {
       componentName: '',
-      componentTitle: ''
+      componentTitle: '',
+      isRegister: false
     },
     mutations:{
       setcomponent(state,payload){
         state.componentName=payload.name
         state.componentTitle=payload.title
+      },
+      register(state){
+        state.isRegister=false
       }
     },
     getters:{
