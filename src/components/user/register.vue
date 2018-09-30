@@ -49,6 +49,15 @@
         ></v-checkbox>
         <v-btn @click="submit" color="blue">SignUp</v-btn>
         <v-btn @click="clear" color="blue">clear</v-btn>
+        <div>
+        <v-alert
+          :value="alert"
+          :type="success"
+          transition="scale-transition"
+        >
+          {{message}}
+        </v-alert>
+        </div>
         </form>
     </v-flex>
     </v-layout>
@@ -57,6 +66,7 @@
 <script>
 import Vue from 'vue'
 import VeeValidate from 'vee-validate'
+import axios from 'axios'
 
 Vue.use(VeeValidate)
 
@@ -70,6 +80,9 @@ export default {
     email: '',
     password: '',
     cnfmPassword: '',
+    type: 'success',
+    message: '',
+    alert: false,
     select: null,
     checkbox: null,
     dictionary: {
@@ -94,7 +107,20 @@ export default {
   },
   methods: {
     submit () {
-      this.$validator.validateAll()
+      if (this.$validator.validateAll()) {
+        axios.post('http://localhost:3000/API/users/register', {
+          name: this.name,
+          email: this.email,
+          password: this.password
+        }).then(res => {
+          this.message = res
+          this.alert = true
+        }).catch(err => {
+          this.message = err
+          this.type = 'error'
+          this.alert = true
+        })
+      }
     },
     clear () {
       this.name = ''
